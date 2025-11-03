@@ -1,0 +1,2 @@
+resources:
+    'ApiPlatform\Tests\Fixtures\TestBundle\Entity\ThisDoesNotExist': ~

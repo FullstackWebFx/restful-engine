@@ -1,0 +1,179 @@
+imports:
+    - { resource: config_common.yml }
+    - { resource: config_behat_mongodb.yml }
+
+parameters:
+    env(MONGODB_DB): api_platform_test
+    env(MONGODB_URL): mongodb://localhost:27017
+
+doctrine_mongodb:
+    connections:
+        default:
+            server: '%env(resolve:MONGODB_URL)%'
+            options: {}
+    default_database: '%env(resolve:MONGODB_DB)%'
+    document_managers:
+        default:
+            mappings:
+                TestBundle:
+                    type: 'attribute'
+                    dir: '%kernel.project_dir%/../TestBundle/Document'
+                    prefix: 'ApiPlatform\Tests\Fixtures\TestBundle\Document'
+
+api_platform:
+    doctrine: false
+    doctrine_mongodb_odm: true
+    mapping:
+        paths:
+            - '%kernel.project_dir%/../TestBundle/Model'
+
+services:
+    app.my_dummy_resource.mongodb.boolean_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.boolean_filter'
+        arguments: [ { 'dummyBoolean': ~, 'embeddedDummy.dummyBoolean': ~, 'relatedDummy.embeddedDummy.dummyBoolean': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.boolean' } ]
+    app.my_dummy_resource.mongodb.date_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.date_filter'
+        arguments: [ { 'dummyDate': ~, 'relatedDummy.dummyDate': ~, 'embeddedDummy.dummyDate': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.date' } ]
+    app.my_dummy_resource.mongodb.exists_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.exists_filter'
+        arguments: [ { 'alias': ~, 'description': ~, 'relatedDummy.name': ~, 'dummyBoolean': ~, 'relatedDummy': ~, 'relatedDummies': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.exists' } ]
+    app.my_dummy_resource.mongodb.numeric_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.numeric_filter'
+        arguments: [ { 'dummyFloat': ~, 'dummyPrice': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.numeric' } ]
+    app.my_dummy_resource.mongodb.order_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.order_filter'
+        arguments: [ { 'id': ~, 'name': 'desc', 'description': ~, 'relatedDummy.name': ~, 'embeddedDummy.dummyName': 'desc', 'relatedDummy.symfony': ~, 'dummyDate': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.order' } ]
+    app.my_dummy_resource.mongodb.range_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.range_filter'
+        arguments: [ { 'dummyFloat': ~, 'dummyPrice': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.range' } ]
+    app.my_dummy_resource.mongodb.search_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.search_filter'
+        arguments: [ { 'id': 'exact', 'name': 'partial', 'alias': 'start', 'description': 'word_start', 'relatedDummy.name': 'exact', 'relatedDummies': 'exact', 'dummy': 'ipartial', 'relatedDummies.name': 'start', 'embeddedDummy.dummyName': 'partial', 'relatedDummy.thirdLevel.level': 'exact', 'relatedDummy.thirdLevel.fourthLevel.level': 'exact', 'relatedDummy.thirdLevel.badFourthLevel.level': 'exact', 'relatedDummy.thirdLevel.fourthLevel.badThirdLevel.level': 'exact', 'nameConverted': 'partial' } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy.mongodb.search' } ]
+    app.related_dummy_resource.mongodb.search_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.search_filter'
+        arguments: [ { 'relatedToDummyFriend.dummyFriend': 'exact', 'name': 'partial', 'age': 'exact' } ]
+        tags:      [ { name: 'api_platform.filter', id: 'related_dummy.mongodb.friends' } ]
+    app.my_dummy_date_resource.mongodb.date_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.date_filter'
+        arguments: [ { 'dummyDate': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy_date.mongodb.date' } ]
+    app.my_dummy_immutable_date_resource.mongodb.date_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.date_filter'
+        arguments: [ { 'dummyDate': ~ } ]
+        tags:      [ { name: 'api_platform.filter', id: 'my_dummy_immutable_date.mongodb.date' } ]
+    app.related_dummy_to_friend_resource.mongodb.search_filter:
+        parent:    'api_platform.doctrine_mongodb.odm.search_filter'
+        arguments: [ { 'name': 'ipartial', 'description': 'ipartial' } ]
+        tags:      [ { name: 'api_platform.filter', id: 'related_to_dummy_friend.mongodb.name' } ]
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\ProductProvider:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\State\ProductProvider'
+        public: false
+        arguments:
+            $managerRegistry: '@doctrine_mongodb'
+            $orm: false
+        tags:
+            -  name: 'api_platform.state_provider'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\TaxonItemProvider:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\State\TaxonItemProvider'
+        public: false
+        arguments:
+            $managerRegistry: '@doctrine_mongodb'
+            $orm: false
+        tags:
+            -  name: 'api_platform.state_provider'
+
+    related_questions.state_provider:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\State\RelatedQuestionsProvider'
+        public: false
+        arguments: ['@doctrine_mongodb']
+        tags:
+            - name: 'api_platform.state_provider'
+
+    app.graphql.query_resolver.dummy_custom_not_retrieved_item_document:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\GraphQl\Resolver\DummyCustomQueryNotRetrievedItemDocumentResolver'
+        public: false
+        tags:
+            - name: 'api_platform.graphql.resolver'
+
+    app.graphql.query_resolver.dummy_custom_item_no_read_and_serialize_document:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\GraphQl\Resolver\DummyCustomQueryNoReadAndSerializeItemDocumentResolver'
+        public: false
+        tags:
+            - name: 'api_platform.graphql.resolver'
+
+    app.graphql.query_resolver.multi_relations_custom_item_document:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\GraphQl\Resolver\MultiRelationsResolveQueryItemResolver'
+        tags:
+            - { name: 'api_platform.graphql.resolver' }
+
+    app.graphql.mutation_resolver.dummy_custom_only_persist_document:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\GraphQl\Resolver\SumOnlyPersistDocumentMutationResolver'
+        public: false
+        tags:
+            - name: 'api_platform.graphql.resolver'
+
+    app.messenger_handler.messenger_with_inputs:
+        class: 'ApiPlatform\Tests\Fixtures\TestBundle\MessengerHandler\Document\MessengerWithInputHandler'
+        public: false
+        tags:
+            - name: 'messenger.message_handler'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\DummyDtoInputOutputProvider: 
+        arguments:
+            $decorated: '@ApiPlatform\Doctrine\Odm\State\ItemProvider'
+        tags:
+            - name: 'api_platform.state_provider'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\DummyDtoNoInputsProvider: 
+        arguments:
+            $itemProvider: '@ApiPlatform\Doctrine\Odm\State\ItemProvider'
+            $collectionProvider: '@ApiPlatform\Doctrine\Odm\State\CollectionProvider'
+        tags:
+            - name: 'api_platform.state_provider'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\CustomOutputDtoProvider: 
+        arguments:
+            $itemProvider: '@ApiPlatform\Doctrine\Odm\State\ItemProvider'
+            $collectionProvider: '@ApiPlatform\Doctrine\Odm\State\CollectionProvider'
+        tags:
+            - name: 'api_platform.state_provider'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\DummyDtoInputOutputProcessor: 
+        arguments:
+            $registry: '@doctrine_mongodb'
+        tags:
+            - name: 'api_platform.state_processor'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\DummyDtoNoInputsProcessor:
+        arguments:
+            $decorated: '@ApiPlatform\Doctrine\Common\State\PersistProcessor'
+        tags:
+            - name: 'api_platform.state_processor'
+
+    ApiPlatform\Tests\Fixtures\TestBundle\State\CustomInputDtoProcessor: 
+        arguments:
+            $decorated: '@ApiPlatform\Doctrine\Common\State\PersistProcessor'
+        tags:
+            - name: 'api_platform.state_processor'
+
+    app_odm_search_filter_via_parameter:
+        parent:    'api_platform.doctrine_mongodb.odm.search_filter'
+        arguments: [ { foo: 'exact' } ]
+        tags:      [ { name: 'api_platform.filter', id: 'app_odm_search_filter_via_parameter' } ]
+ 
+    app_odm_search_filter_via_parameter.order_filter:
+        parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+        arguments: [ { id: 'ASC', foo: 'DESC' } ]
+        tags:  [ 'api_platform.filter' ]
+
+    ApiPlatform\Tests\Fixtures\TestBundle\Filter\QueryParameterOdmFilter:
+        tags:  [ 'api_platform.filter' ]

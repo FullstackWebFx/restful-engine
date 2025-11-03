@@ -1,0 +1,17 @@
+when@test:
+  framework:
+    test: true
+api_platform:
+  formats:
+    jsonld: ['application/ld+json']
+    json: ['application/json']
+  docs_formats:
+    jsonopenapi: ['application/vnd.openapi+json']
+  http_cache:
+    invalidation:
+        enabled: true
+    public: true
+  use_symfony_listeners: false
+  defaults:
+    extra_properties:
+      standard_put: true

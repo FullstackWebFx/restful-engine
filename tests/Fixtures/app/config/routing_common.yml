@@ -1,0 +1,12 @@
+_main:
+    resource: routing.yml
+
+controller:
+    resource: '@TestBundle/Controller/Common'
+    type: attribute
+
+relation_embedded.custom_get:
+    path: '/relation_embedders/{id}/custom'
+    methods: ['GET', 'HEAD']
+    defaults:
+        _controller: 'ApiPlatform\Tests\Fixtures\TestBundle\Controller\CustomController::customAction'

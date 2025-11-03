@@ -1,0 +1,47 @@
+<?php
+
+/*
+ * This file is part of the API Platform project.
+ *
+ * (c) Kévin Dunglas <dunglas@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace ApiPlatform\Tests\Fixtures\TestBundle\GraphQl\Resolver;
+
+use ApiPlatform\GraphQl\Resolver\MutationResolverInterface;
+use ApiPlatform\Tests\Fixtures\TestBundle\Model\MediaObject;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+/**
+ * Resolver for custom multi file upload mutation.
+ *
+ * @author Mahmood Bazdar <mahmood@bazdar.me>
+ */
+class UploadMultipleMediaObjectResolver implements MutationResolverInterface
+{
+    public function __invoke(?object $item, array $context): MediaObject
+    {
+        $mediaObject = null;
+
+        /**
+         * @var UploadedFile[]
+         */
+        $uploadedFiles = $context['args']['input']['files'];
+
+        // Some process to save the files.
+
+        foreach ($uploadedFiles as $key => $uploadedFile) {
+            $mediaObject = new MediaObject();
+            $mediaObject->id = $key;
+            $mediaObject->contentUrl = $uploadedFile->getFilename();
+        }
+
+        // Currently API Platform does not support custom mutation with collections so for now, we are returning the last created media object.
+        return $mediaObject;
+    }
+}

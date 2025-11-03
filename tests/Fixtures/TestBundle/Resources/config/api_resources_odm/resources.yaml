@@ -1,0 +1,37 @@
+properties:
+    ApiPlatform\Tests\Fixtures\TestBundle\Document\FileConfigDummy:
+        foo:
+            description: The dummy foo
+
+resources:
+    ApiPlatform\Tests\Fixtures\TestBundle\Document\Program:
+        -   ~
+        -   uriTemplate: /users/{author}/programs
+            uriVariables:
+                author:
+                    fromClass: ApiPlatform\Tests\Fixtures\TestBundle\Document\User
+                    toProperty: author
+            types: [someirischema]
+            description: User programs
+            operations:
+                ApiPlatform\Metadata\GetCollection: ~
+                ApiPlatform\Metadata\Get:
+                    uriTemplate: /users/{userId}/programs/{id}
+                    types: [anotheririschema]
+                    uriVariables:
+                        userId:
+                            fromClass: ApiPlatform\Tests\Fixtures\TestBundle\Document\User
+                            toProperty: author
+                        id: [ApiPlatform\Tests\Fixtures\TestBundle\Document\Program, id]
+
+    ApiPlatform\Tests\Fixtures\TestBundle\Document\FileConfigDummy:
+        shortName: fileconfigdummy
+        description: Dummy resource
+        itemOperations:
+            custom_operation:
+                method: GET
+                controller: app.config_dummy_resource.action
+
+    ApiPlatform\Tests\Fixtures\TestBundle\Document\SingleFileConfigDummy:
+        shortName: single_file_config
+        description: File configured resource
